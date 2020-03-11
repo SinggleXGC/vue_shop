@@ -6,16 +6,16 @@
                 <img src="../assets/logo.png" alt="" />
             </div>
             <!--表单区域-->
-            <el-form class="login_form">
-                <el-form-item>
-                    <el-input prefix-icon="el-icon-user"></el-input>
+            <el-form class="login_form" :model="loginForm" :rules="loginFormRules" ref="loginFormRef">
+                <el-form-item prop="username">
+                    <el-input prefix-icon="el-icon-user" v-model="loginForm.username"></el-input>
                 </el-form-item>
-                <el-form-item>
-                    <el-input prefix-icon="el-icon-lock"></el-input>
+                <el-form-item prop="password">
+                    <el-input prefix-icon="el-icon-lock" v-model="loginForm.password" type="password"></el-input>
                 </el-form-item>
                 <el-form-item class="btns">
-                    <el-button type="primary">提交</el-button>
-                    <el-button type="info">重置</el-button>
+                    <el-button type="primary" @click="login">提交</el-button>
+                    <el-button type="info" @click="resetLoginForm">重置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -24,7 +24,46 @@
 
 <script>
     export default {
-        name: "Login"
+        name: "Login",
+        data() {
+            return {
+                //登录表单的数据绑定对象
+                loginForm: {
+                    username: 'admin',
+                    password: '123456'
+                },
+                //表单的验证规则对象
+                loginFormRules: {
+                    username: [
+                        { required: true, message: '请输入用户名', trigger: 'blur' },
+                        { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+                    ],
+                    password: [
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                        { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+                    ]
+                }
+            }
+        },
+        methods: {
+            //点击重置按钮，重置登录表单
+            resetLoginForm() {
+                this.$refs.loginFormRef.resetFields();
+            },
+            login() {
+                //valid参数表示表单数据是否通过验证 回调函数赋值
+                this.$refs.loginFormRef.validate(async valid => {
+                    if (!valid) return;
+                    const {data: res} = await this.$http.post("login", this.loginForm);
+                    if(res.meta.status != 200) return this.$message.error("登录失败");
+                    this.$message.success("登录成功");
+                    //将登录成功后的token存入到客户端的sessionStorage中
+                    window.sessionStorage.setItem('token', res.data.token);
+                    //登录成功后跳转到后台主页
+                    this.$router.push('/home');
+                });
+            }
+        }
     }
 </script>
 
