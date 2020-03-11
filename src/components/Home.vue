@@ -15,7 +15,7 @@
                 <div class="toggle-button" @click="toggleCollapse">|||</div>
                 <!--侧边菜单区域-->
                 <el-menu background-color="#333744" text-color="#fff" active-text-color="#409EFF"
-                         unique-opened :collapse="isCollpased" :collapse-transition="false" router>
+                         unique-opened :collapse="isCollpased" :collapse-transition="false" router :default-active=activePath>
                     <!--一级菜单-->
                     <el-submenu :index="item.id + '' " v-for="item in menuList" :key="item.id">
                         <template slot="title">
@@ -24,7 +24,8 @@
                         </template>
 
                         <!--二级菜单-->
-                        <el-menu-item :index="'/' + item.path " v-for="subitem in item.children" :key="subitem.id">
+                        <el-menu-item :index="'/' + subitem.path " v-for="subitem in item.children" :key="subitem.id"
+                                      @click="saveNavStatus('/' + subitem.path)">
                             <i class="el-icon-menu"></i>
                             <span>{{subitem.authName}}</span>
                         </el-menu-item>
@@ -52,7 +53,8 @@
                     '102': 'iconfont icon-danju',
                     '145': 'iconfont icon-baobiao'
                 },
-                isCollpased: false
+                isCollpased: false,
+                activePath: ''
             }
         },
         methods: {
@@ -67,10 +69,14 @@
             },
             toggleCollapse() {
                 this.isCollpased = !this.isCollpased
+            },
+            saveNavStatus(activePath) {
+                window.sessionStorage.setItem('activePath', activePath)
             }
         },
         created() {
             this.getMenuList()
+            this.activePath = window.sessionStorage.getItem('activePath')
         }
     }
 </script>
