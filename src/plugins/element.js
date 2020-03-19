@@ -15,4 +15,4 @@ Vue.use(Form).use(FormItem).use(Input).use(Button)
     .use(Table).use(TableColumn).use(Switch).use(Tooltip).use(Pagination)
     .use(Dialog).use(Tag)
 Vue.prototype.$message=Message
-Vue.prototype.$confirm=MessageBox
+Vue.prototype.$confirm=MessageBox.confirm
