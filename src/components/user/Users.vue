@@ -338,7 +338,6 @@
                 const {data: res} = await this.$http.put(`users/${this.userInfo.id}/role`, {
                     rid: this.selectedRoleId
                 });
-                console.log(res)
                 if(res.meta.status != 200) return this.$message.error('更新角色失败');
                 this.$message.success('更新角色成功');
                 this.getUserList();

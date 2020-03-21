@@ -28,7 +28,7 @@
                 </template>
 
                 <template v-slot:opt="scope">
-                    <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
+                    <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditCateDialog(scope.row.cat_id)">编辑</el-button>
                     <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteCate(scope.row)">删除</el-button>
                 </template>
             </tree-table>
@@ -42,7 +42,7 @@
         <!-- 添加分类的对话框 -->
         <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%" @close="addCateDialogClosed">
             <!-- 内容主体区域 -->
-            <el-form :model="addCateForm" :rules="addCateFormRules" ref="addCateFormRef" label-width="100px">
+            <el-form :model="addCateForm" :rules="cateFormRules" ref="addCateFormRef" label-width="100px">
                 <el-form-item label="分类名称" prop="cat_name">
                     <el-input v-model="addCateForm.cat_name"></el-input>
                 </el-form-item>
@@ -55,6 +55,21 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="addCateDialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="addCate">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑分类的对话框 -->
+        <el-dialog title="编辑分类" :visible.sync="editCateDialogVisible" width="50%" @close="editCateDialogClosed">
+            <!-- 内容主体区域 -->
+            <el-form :model="editCateForm" :rules="cateFormRules" ref="editCateFormRef" label-width="100px">
+                <el-form-item label="分类名称" prop="cat_name">
+                    <el-input v-model="editCateForm.cat_name"></el-input>
+                </el-form-item>
+            </el-form>
+            <!-- 底部区域 -->
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editCateDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editCate">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -98,12 +113,17 @@
                     cat_pid: 0,
                     cat_level: 0
                 },
-                addCateFormRules: {
+                editCateForm: {
+                    cat_name: '',
+                    cat_id: ''
+                },
+                cateFormRules: {
                     cat_name: [
                         { required: true, message: '请输入分类名称', trigger: 'blur' }
                     ]
                 },
                 addCateDialogVisible: false,
+                editCateDialogVisible: false,
                 parentCateList: [],
                 cascaderProps: {
                     value: 'cat_id',
@@ -168,6 +188,9 @@
                 this.addCateForm.cat_level=0;
                 this.addCateForm.cat_pid=0;
             },
+            editCateDialogClosed() {
+                this.$refs.editCateFormRef.resetFields();
+            },
             async deleteCate(cateObj){
                 const confirmResult = await this.$confirm('此操作将永远删除该商品分类，是否继续', '提示', {
                     confirmButtonText: '确定',
@@ -180,6 +203,20 @@
                 if(res.meta.status != 200) return this.$message.error('删除商品分类失败');
                 this.$message.success('删除商品分类成功');
                 this.getCateList();
+            },
+            async showEditCateDialog(id){
+                const {data: res} = await this.$http.get('categories/' + id);
+                if (res.meta.status != 200) return this.$message.error('获取分类数据失败');
+                this.editCateForm = res.data;
+                this.editCateDialogVisible = true;
+            },
+            async editCate() {
+                console.log("this.editCateForm");
+                const {data: res} = await this.$http.put('categories/' + this.editCateForm.cat_id, {cat_name: this.editCateForm.cat_name});
+                if (res.meta.status != 200) return this.$message.error('更新分类失败');
+                this.$message.success('更新分类成功');
+                this.getCateList();
+                this.editCateDialogVisible = false;
             }
         }
     }
