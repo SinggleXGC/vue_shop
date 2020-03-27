@@ -18,15 +18,25 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 
+import Nprogress from 'nprogress'
+import 'nprogress/nprogress.css'
+
 Vue.use(VueQuillEditor)
 
 //配置请求的根路径
 axios.defaults.baseURL='http://127.0.0.1:8888/api/private/v1/'
 //config代表请求对象
 axios.interceptors.request.use(config => {
+  Nprogress.start();
   config.headers.Authorization = window.sessionStorage.getItem('token')
-  return config
+  return config;
 })
+
+axios.interceptors.response.use(config => {
+  Nprogress.done();
+  return config;
+})
+
 Vue.prototype.$http = axios
 
 Vue.component('tree-table', TreeTable)
